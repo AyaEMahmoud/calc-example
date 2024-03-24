@@ -13,36 +13,50 @@ class ViewController: UIViewController {
     @IBOutlet weak private var displayLabel: UILabel!
     private var didFinishTyping: Bool = true
     private var isDecimalPointAdded: Bool = false
+    private var calcLgic = CalculatorLogic()
+    
+    private var displyValue: Double {
+        get {
+            guard let number = Double(displayLabel.text!) else {
+                fatalError("Could not convert \(String(describing: displayLabel.text)) to double!")
+            }
+            return number
+        }
+        set {
+            displayLabel.text = String(newValue)
+            calcLgic.setNumber(displyValue)
+
+        }
+        
+    }
     
     @IBAction func calcButtonPressed(_ sender: UIButton) {
         
         //What should happen when a non-number button is pressed
-    
-        guard let number = Double(displayLabel.text!) else {
-            fatalError("Could not convert \(String(describing: displayLabel.text)) to double!")
-        }
+        
+        let binaryOperations = ["+", "-", "÷", "×"]
+        
         if let operation = sender.currentTitle {
             if displayLabel.text == "0" {
                 return
             } else {
-                if operation == "+/-" {
-                    displayLabel.text = String(number * -1)
-                } else if operation == "%" {
-                    displayLabel.text = String(number * 0.01)
-                } else if operation == "AC" {
-                    displayLabel.text = "0"
-                    didFinishTyping = true
-                    isDecimalPointAdded = false
+                if let val = calcLgic.calculate(symbol: operation) {
+                    displyValue = val
+                    if displyValue == 0 || binaryOperations.contains(operation) {
+                        didFinishTyping = true
+                        isDecimalPointAdded = false
+                    } 
                 }
+               
             }
         }
     }
-
+    
     
     @IBAction func numButtonPressed(_ sender: UIButton) {
         
         //What should happen when a number is entered into the keypad
-    
+        
         if let numVal = sender.currentTitle {
             if didFinishTyping {
                 displayLabel.text = sender.currentTitle
@@ -58,8 +72,11 @@ class ViewController: UIViewController {
                     displayLabel.text! += numVal
                 }
             }
+            if let val = Double(displayLabel.text!) {
+                calcLgic.setNumber(val)
+            }
         }
     }
-
+    
 }
 
